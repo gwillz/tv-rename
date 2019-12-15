@@ -36,3 +36,6 @@ class Episode(object):
         target = os.path.join(target_path, self.result())
         
         os.rename(source, target)
+    
+    
+    # @todo sorting methods

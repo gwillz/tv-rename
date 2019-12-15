@@ -10,15 +10,15 @@ def parseExtension(path: str) -> str:
 
 
 def parseShowName(path: str) -> str:
-    m = re.search(r"^(.+?)(?:collection|series|episode|s\d+e\d+|\d+of\d+|\d+x\d+)", path, re.IGNORECASE)
+    m = re.search(r"^(.+?)(?:collection|series|episode|ep|s\d+e\d+|\d+of\d+|\d+x\d+)", path, re.IGNORECASE)
     
-    if not m: raise Exception(f"Cannot parse episode name [{path}]")
+    if not m: raise Exception(f"Cannot parse show name [{path}]")
     
     return cleanText(m[1])
 
 
 def parseEpisodeName(path: str) -> str:
-    m = re.search(r"(?:s\d+e\d+|\d+of\d+|\d+x\d+)(.*?)" + EXTENSION_RE, path, re.IGNORECASE)
+    m = re.search(r"(?:s\d+e\d+|\d+of\d+|\d+x\d+)(.+)" + EXTENSION_RE, path, re.IGNORECASE)
     
     if not m: return ""
     
@@ -38,8 +38,8 @@ def parseEpisode(path: str) -> int:
     m = re.search("\d+x(\d+)", path, re.IGNORECASE)
     if m: return int(m[1])
     
-    # episode_.
-    m = re.search("episode\W+(\d+)", path, re.IGNORECASE)
+    # episode x or part x
+    m = re.search("(?:episode|ep|part)\W+(\d+)", path, re.IGNORECASE)
     if m: return int(m[1])
     
     raise Exception(f"Cannot parse episode [{path}]")
