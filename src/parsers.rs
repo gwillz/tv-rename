@@ -5,48 +5,48 @@ use regex::Regex;
 lazy_static! {
     // Capture everything before the season/episode identifier.
     static ref SHOW_NAME: Regex =
-        Regex::new("(.+?)\\b(?i:collection|series|episode|ep|part|s\\d+e\\d+|\\d+of\\d+|\\d+x\\d+)\\b")
+        Regex::new(r"(.+?)\b(?i:collection|series|episode|ep|part|s\d+e\d+|\d+of\d+|\d+x\d+)\b")
         .unwrap();
     
     // Capture the season number by association to a word.
     static ref SEASON_NUMBER_BY_NAME: Regex =
-        Regex::new("(?i:season|series|collection)\\W*(\\d+)")
+        Regex::new(r"(?i:season|series|collection)\W*(\d+)")
         .unwrap();
     
-    // Capture the season number by ID type s%%e%%
+    // Capture the season number by ID type S--E--
     static ref SEASON_NUMBER_BY_SE: Regex =
-        Regex::new("(?i:s(\\d{2,})e\\d{2,})")
+        Regex::new(r"(?i:s(\d{2,})e\d{2,})")
         .unwrap();
     
-    // Capture the season number ID type %x%
+    // Capture the season number ID type --x--
     static ref SEASON_NUMBER_BY_X: Regex =
-        Regex::new("(?i:(\\d+)x\\d+)")
+        Regex::new(r"(?i:(\d+)x\d+)")
         .unwrap();
     
     // Capture everything after the season/episode identifier.
     static ref EPISODE_NAME: Regex =
-        Regex::new("(?i:s\\d+e\\d+|\\d+of\\d+|\\d+x\\d+)(.+)\\.(?i:[a-z0-9]+)$")
+        Regex::new(r"(?i:s\d+e\d+|\d+of\d+|\d+x\d+)(.+)\.(?i:[a-z0-9]+)$")
         .unwrap();
     
-    // Capture the episode number by ID %% of %%
+    // Capture the episode number by --of--
     static ref EPISODE_NUMBER_BY_OF: Regex =
-        Regex::new("(?i:(\\d+)\\W*of\\W*\\d+)").unwrap();
+        Regex::new(r"(?i:(\d+)\W*of\W*\d+)").unwrap();
     
-    // Capture the episode number by ID s%%e%%
+    // Capture the episode number by S--E--
     static ref EPISODE_NUMBER_BY_SE: Regex =
-        Regex::new("(?i:s\\d{2,}e(\\d{2,}))").unwrap();
+        Regex::new(r"(?i:s\d{2,}e(\d{2,}))").unwrap();
     
-    // Capture the episode number by ID %%x%%
+    // Capture the episode number by --x--
     static ref EPISODE_NUMBER_BY_X: Regex =
-        Regex::new("(?i:\\d+x(\\d+))").unwrap();
+        Regex::new(r"(?i:\d+x(\d+))").unwrap();
     
     // Capture the episode by association to a word.
     static ref EPISODE_NUMBER_BY_NAME: Regex =
-        Regex::new("(?i:episode|ep|part)\\W*(\\d+)").unwrap();
+        Regex::new(r"(?i:episode|ep|part)\W*(\d+)").unwrap();
     
     // Capture the file extension.
     static ref EXTENSION: Regex =
-        Regex::new("\\.(\\w+)$").unwrap();
+        Regex::new(r"\.(\w+)$").unwrap();
 }
 
 // Get the show name.
@@ -66,14 +66,14 @@ pub fn parse_season_number(path: &String) -> Option<String> {
             .map(|m| String::from(&m[1]));
     }
     
-    // by S..E..
+    // by S--E--
     if caps.is_none() {
         caps = SEASON_NUMBER_BY_SE
             .captures(path)
             .map(|m| String::from(&m[1]));
     }
     
-    // by .x.
+    // by --x--
     if caps.is_none() {
         caps = SEASON_NUMBER_BY_X
             .captures(path)
@@ -94,28 +94,28 @@ pub fn parse_episode_number(path: &String) -> Option<String> {
     
     let mut caps: Option<String> = None;
     
-    // ..of..
+    // by --of--
     if caps.is_none() {
         caps = EPISODE_NUMBER_BY_OF
             .captures(path)
             .map(|m| String::from(&m[1]));
     }
     
-    // s..e..
+    // by S--E--
     if caps.is_none() {
         caps = EPISODE_NUMBER_BY_SE
             .captures(path)
             .map(|m| String::from(&m[1]));
     }
     
-    // ..x..
+    // by --x--
     if caps.is_none() {
         caps = EPISODE_NUMBER_BY_X
             .captures(path)
             .map(|m| String::from(&m[1]));
     }
     
-    // episode x or part x
+    // by name
     if caps.is_none() {
         caps = EPISODE_NUMBER_BY_NAME
             .captures(path)
