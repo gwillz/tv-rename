@@ -51,42 +51,26 @@ fn main() {
     println!("");
     
     // Guess show name.
-    let mut show_name = guesser.get_show_name()
+    let show_name = guesser.get_show_name()
         .map(|name| cleaner.clean(&name));
     
-    match show_name.as_ref() {
-        Some(name) => {
-            println!("I think this is {}.", name);
-        }
-        None => {
-            println!("I don't know what show this is.");
-        }
-    }
+    // Confirm the show name.
+    println!("{}",
+        if show_name.is_some() { "I think this show is:" }
+        else { "I don't know what this show is:" }
+    );
+    let show_name = input.text(show_name.unwrap_or(String::new()));
     
-    // Double check, maybe change it.
-    if show_name.is_none() || !input.confirm() {
-        println!("\nOkay, what should it be?");
-        let name = show_name.unwrap_or(String::new());
-        show_name = Some(input.text(name.as_ref()));
-    }
-    
-    // We definitely have an actual show name now.
-    let show_name = show_name.unwrap();
-    
-    println!("Roger that.\n");
+    println!("");
     
     // Guess the season number.
     let mut season_number = guesser.get_season_number().unwrap_or(1);
     
-    print!("I think this is season {}.", season_number);
+    // Confirm the season number.
+    print!("I think this season is:");
+    season_number = input.number(season_number);
     
-    // Double check, maybe change it.
-    if !input.confirm() {
-        println!("\nOkay, what should it be?");
-        season_number = input.number(season_number);
-    }
-    
-    println!("Roger that.\n");
+    println!("");
     
     // Create episode objects.
     let factory = EpisodeFactory::new(&show_name, season_number, &cleaner);

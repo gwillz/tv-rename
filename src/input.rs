@@ -39,9 +39,9 @@ impl Input {
         }
     }
     
-    pub fn text(&mut self, prefill: &str) -> String {
+    pub fn text<S: AsRef<str>>(&mut self, prefill: S) -> String {
         loop {
-            match self.rl.readline_with_initial(">> ", (prefill, "")) {
+            match self.rl.readline_with_initial(">> ", (prefill.as_ref(), "")) {
                 Ok(line) => {
                     if !line.is_empty() {
                         return line;
