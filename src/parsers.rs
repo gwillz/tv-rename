@@ -49,12 +49,12 @@ lazy_static! {
         Regex::new(r"\.(\w+)$").unwrap();
 }
 
-// Get the show name.
+/// Get the show name.
 pub fn parse_show_name(path: &String) -> Option<String> {
     SHOW_NAME.captures(path).map(|m| String::from(&m[1]))
 }
 
-// 
+/// Get the season number.
 pub fn parse_season_number(path: &String) -> Option<i32> {
     
     let mut caps: Option<String> = None;
@@ -88,6 +88,7 @@ pub fn parse_season_number(path: &String) -> Option<i32> {
     None
 }
 
+/// Get the episode name.
 pub fn parse_episode_name(path: &String) -> Option<String> {
     EPISODE_NAME
         .captures(path)
@@ -95,6 +96,7 @@ pub fn parse_episode_name(path: &String) -> Option<String> {
         .or(Some(String::new()))
 }
 
+/// Get the episode number.
 pub fn parse_episode_number(path: &String) -> Option<i32> {
     
     let mut caps: Option<String> = None;
@@ -135,6 +137,7 @@ pub fn parse_episode_number(path: &String) -> Option<i32> {
     None
 }
 
+/// Get the extension.
 pub fn parse_extension(path: &String) -> Option<String> {
     EXTENSION
         .captures(path)

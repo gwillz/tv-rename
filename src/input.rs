@@ -9,8 +9,10 @@ pub struct Input {
     handler: Handler,
 }
 
+/// Wrapper for readline.
 impl Input {
     
+    /// A global error handler for all the methods.
     pub fn new(handler: Handler) -> Input {
         Input {
             rl: Editor::new(),
@@ -18,10 +20,12 @@ impl Input {
         }
     }
     
+    /// Ask a question.
     pub fn confirm(&mut self) -> bool {
         loop {
             match self.rl.readline("yes? ") {
                 Ok(line) => {
+                    // Enforce a legitimate answer.
                     match line.as_ref() {
                         "y" | "yes" => {
                             return true;
@@ -34,15 +38,18 @@ impl Input {
                         }
                     }
                 },
+                // Pass off to the global handler.
                 Err(err) => (self.handler)(err),
             }
         }
     }
     
+    /// Query for text. Must not be empty.
     pub fn text<S: AsRef<str>>(&mut self, prefill: S) -> String {
         loop {
             match self.rl.readline_with_initial(">> ", (prefill.as_ref(), "")) {
                 Ok(line) => {
+                    // Must not be empty.
                     if !line.is_empty() {
                         return line;
                     }
@@ -51,17 +58,20 @@ impl Input {
                         continue;
                     }
                 },
+                // Pass off to the global handler.
                 Err(err) => (self.handler)(err),
             }
         }
     }
     
+    /// Query for a number. Must be an integer.
     pub fn number(&mut self, num: i32) -> i32 {
         let prefill = num.to_string();
         
         loop {
             match self.rl.readline_with_initial(">> ", (prefill.as_ref(), "")) {
                 Ok(line) => {
+                    // Must be a number.
                     match line.parse::<i32>() {
                         Ok(num) => return num,
                         Err(_) => {
@@ -74,7 +84,8 @@ impl Input {
             }
         }
     }
-
+    
+    /// Wait for input. Enter or an escape command - don't care.
     pub fn pause(&mut self) {
         println!("\nPress enter to exit.");
         match self.rl.readline("") {

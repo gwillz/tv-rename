@@ -3,6 +3,7 @@ use std::fs::File;
 use std::path::Path;
 use std::io::{self, Write};
 
+/// Default in-built exclude rules.
 pub const EXCLUDE_RULES: [&'static str; 26] = [
     "aac",
     "ac3",
@@ -32,6 +33,7 @@ pub const EXCLUDE_RULES: [&'static str; 26] = [
     "hd",
 ];
 
+/// Write the default exclude list to file.
 pub fn write_exclude<P: AsRef<Path>>(path: P) -> Result<(), io::Error> {
     match File::create(path) {
         Ok(file) => {

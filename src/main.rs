@@ -43,12 +43,10 @@ fn main() {
     let files = read_directory(&path)
         .unwrap_or_else(|_| quit("Can't read the directory!"));
     
-    println!("Loaded {} files.", files.len());
+    println!("Loaded {} files.\n", files.len());
     
     // Remap into a string vec for guesses.
     let guesser = Guesser::new(&files);
-    
-    println!("");
     
     // Guess show name.
     let show_name = guesser.get_show_name()
@@ -60,16 +58,14 @@ fn main() {
         else { "I don't know what this show is:" }
     );
     let show_name = input.text(show_name.unwrap_or(String::new()));
-    
     println!("");
     
     // Guess the season number.
-    let mut season_number = guesser.get_season_number().unwrap_or(1);
+    let season_number = guesser.get_season_number().unwrap_or(1);
     
     // Confirm the season number.
-    print!("I think this season is:");
-    season_number = input.number(season_number);
-    
+    println!("I think this season is:");
+    let season_number = input.number(season_number);
     println!("");
     
     // Create episode objects.
@@ -85,14 +81,13 @@ fn main() {
     episodes.sort();
     
     // Preview.
-    println!("How's this?\n");
+    println!("\nHow's this?\n");
     
     for ep in &episodes {
         println!("{}", ep);
     }
-    println!("");
     
-    println!("Do you want to rename these?");
+    println!("\nDo you want to rename these?");
     
     if input.confirm() {
         println!("\nWorking...");
@@ -113,11 +108,13 @@ fn main() {
     input.pause();
 }
 
+/// Quit message. Kinda like panic, but prettier.
 fn quit(message: &str) -> ! {
     println!("{}\nQuitting.", message);
     std::process::exit(1)
 }
 
+/// Handle errors from readline.
 fn input_errors(err: ReadlineError) -> () {
     match err {
         ReadlineError::Interrupted => {
@@ -133,8 +130,8 @@ fn input_errors(err: ReadlineError) -> () {
     }
 }
 
-// Get the directory from arg 1.
-// Or, if not provided, the current working directory.
+/// Get the directory from arg 1.
+/// Or, if not provided, the current working directory.
 fn get_directory() -> Result<PathBuf, io::Error> {
     match env::args().skip(1).next() {
         Some(path) => PathBuf::from(&path).canonicalize(),
@@ -142,7 +139,7 @@ fn get_directory() -> Result<PathBuf, io::Error> {
     }
 }
 
-// Read the directory as a vector of entries.
+/// Read the directory as a vector of entries.
 fn read_directory(path: &PathBuf) -> Result<Vec<DirEntry>, io::Error> {
     fs::read_dir(path).map(|dir| {
         dir.map(|entry| entry.unwrap())
@@ -150,6 +147,7 @@ fn read_directory(path: &PathBuf) -> Result<Vec<DirEntry>, io::Error> {
     })
 }
 
+/// Get the config path.
 fn get_exclude_path() -> Result<PathBuf, &'static str> {
     match ProjectDirs::from("com", "gwillz", "tv-rename") {
         // Good, now try writing the exclude file.

@@ -4,10 +4,12 @@ use std::fs;
 use std::fmt;
 use std::cmp::{self, Ordering};
 use std::path::PathBuf;
+use std::ffi::OsStr;
 
 use super::cleaner::Cleaner;
 use super::parsers::{parse_episode_name, parse_episode_number, parse_extension};
 
+/// Factory for creating episode objects.
 pub struct EpisodeFactory<'c,> {
     season: i32,
     show_name: String,
@@ -15,6 +17,7 @@ pub struct EpisodeFactory<'c,> {
 }
 
 impl<'c> EpisodeFactory<'c> {
+    
     pub fn new(show_name: &String, season: i32, cleaner: &'c Cleaner) -> EpisodeFactory<'c> {
         EpisodeFactory {
             show_name: show_name.clone(),
@@ -23,6 +26,8 @@ impl<'c> EpisodeFactory<'c> {
         }
     }
     
+    /// Create an episode.
+    /// Parses the episode name, number and extension from the given path.
     pub fn create(&self, path: PathBuf) -> Result<Episode, &str> {
         
         // I haven't seen this one fail yet.
@@ -60,6 +65,7 @@ impl<'c> EpisodeFactory<'c> {
     }
 }
 
+/// This represents an old and new paths of an episode.
 pub struct Episode {
     pub(in crate) path: PathBuf,
     pub(in crate) episode: i32,
@@ -70,6 +76,7 @@ pub struct Episode {
 }
 
 impl Episode {
+    /// The new name for an episode, created from parsed parts.
     pub fn result(&self) -> String {
         if self.name.is_empty() {
             format!("{} S{:02}E{:02}.{}",
@@ -90,6 +97,7 @@ impl Episode {
         }
     }
     
+    /// Rename the episode file.
     pub fn rename(&self) -> io::Result<()> {
         fs::rename(self.path.as_path(), self.path.with_file_name(self.result()))
     }
@@ -97,8 +105,11 @@ impl Episode {
 
 impl fmt::Display for Episode {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let original = self.path.file_name().unwrap().to_str().unwrap();
-        write!(f, "{} -> {}", original, self.result())
+        write!(f, "{} -> {}",
+            self.path.file_name().unwrap_or_else(|| OsStr::new(""))
+                .to_str().unwrap_or(""),
+            self.result()
+        )
     }
 }
 
@@ -121,20 +132,20 @@ impl cmp::Ord for Episode {
     fn cmp(&self, other: &Self) -> Ordering {
         if self.season == other.season {
             if self.episode == other.episode {
-                return Ordering::Equal;
+                Ordering::Equal
             }
             else if self.episode > other.episode {
-                return Ordering::Greater;
+                Ordering::Greater
             }
             else {
-                return Ordering::Less;
+                Ordering::Less
             }
         }
         else if self.season > other.season {
-            return Ordering::Greater;
+            Ordering::Greater
         }
         else {
-            return Ordering::Less;
+            Ordering::Less
         }
     }
 }

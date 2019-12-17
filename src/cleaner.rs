@@ -4,23 +4,23 @@ use std::io;
 use std::path::Path;
 use inflector::Inflector;
 
+/// Clean strings.
+/// - Removes strings provided by an 'exclude' file.
+/// - Replaces separators with white space.
+/// - Formats in 'Title Case'.
 pub struct Cleaner {
     rules: Vec<String>,
 }
 
 impl Cleaner {
-    pub fn new() -> Cleaner {
+    
+    fn new() -> Cleaner {
         Cleaner {
             rules: Vec::new(),
         }
     }
     
-    pub fn create<P: AsRef<Path>>(path: P) -> Result<Cleaner, io::Error> {
-        let mut cleaner = Cleaner::new();
-        cleaner.load(path).map(|_| cleaner)
-    }
-    
-    pub fn load<P: AsRef<Path>>(&mut self, path: P) -> Result<(), io::Error> {
+    fn load<P: AsRef<Path>>(&mut self, path: P) -> Result<(), io::Error> {
         fs::read_to_string(path)
             .map(|contents| {
                 self.rules = contents.split("\n")
@@ -29,6 +29,12 @@ impl Cleaner {
             })
     }
     
+    pub fn create<P: AsRef<Path>>(path: P) -> Result<Cleaner, io::Error> {
+        let mut cleaner = Cleaner::new();
+        cleaner.load(path).map(|_| cleaner)
+    }
+    
+    /// Clean this text.
     pub fn clean(&self, text: &String) -> String {
         let mut working = text.to_lowercase();
         
@@ -38,6 +44,7 @@ impl Cleaner {
         
         return working.to_title_case();
     }
+    
     pub fn size(&self) -> usize {
         self.rules.len()
     }
