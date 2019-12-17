@@ -1,0 +1,162 @@
+
+use std::env;
+use std::fs::{self, DirEntry};
+use std::io;
+use std::path::PathBuf;
+
+use rustyline::error::ReadlineError;
+
+use input::Input;
+use cleaner::Cleaner;
+use guesser::Guesser;
+use episode::{Episode, EpisodeFactory};
+
+mod input;
+mod parsers;
+mod cleaner;
+mod guesser;
+mod episode;
+
+fn main() {
+    println!("TV Rename v1.\n");
+    
+    let mut input = Input::new(input_errors);
+    
+    // Read exclude rules.
+    let cleaner = Cleaner::create("./exclude.txt")
+        .unwrap_or_else(|_| quit("Failed to load exclude.txt"));
+    
+    println!("Exclude DB loaded {} rules.", cleaner.size());
+    
+    // Get target path.
+    let path = get_directory()
+        .unwrap_or_else(|_| quit("Can't find that path!"));
+    
+    println!("Reading {}", path.display());
+    
+    // Read target directory.
+    let files = read_directory(&path)
+        .unwrap_or_else(|_| quit("Can't read the directory!"));
+    
+    println!("Loaded {} files.", files.len());
+    
+    // Remap into a string vec for guesses.
+    let guesser = Guesser::new(&files);
+    
+    println!("");
+    
+    // Guess show name.
+    let mut show_name = guesser.get_show_name()
+        .map(|name| cleaner.clean(&name));
+    
+    match show_name.as_ref() {
+        Some(name) => {
+            println!("I think this is {}.", name);
+        },
+        None => {
+            println!("I don't know what show this is.");
+        }
+    }
+    
+    // Double check, maybe change it.
+    if show_name.is_none() || !input.confirm() {
+        println!("\nOkay, what should it be?");
+        let name = show_name.unwrap_or(String::new());
+        show_name = Some(input.text(name.as_ref()));
+    }
+    
+    // We definitely have an actual show name now.
+    let show_name = show_name.unwrap();
+    
+    println!("Roger that.\n");
+    
+    // Guess the season number.
+    let mut season_number = guesser.get_season_number().unwrap_or(1);
+    
+    print!("I think this is season {}.", season_number);
+    
+    // Double check, maybe change it.
+    if !input.confirm() {
+        println!("\nOkay, what should it be?");
+        season_number = input.number(season_number);
+    }
+    
+    println!("Roger that.\n");
+    
+    // Create episode objects.
+    let factory = EpisodeFactory::new(&show_name, season_number, &cleaner);
+    
+    let mut episodes: Vec<Episode> = files.iter()
+        .map(|file| {
+            factory.create(file.path())
+                .unwrap_or_else(|e| quit(e.as_ref()))
+        })
+        .collect();
+    
+    episodes.sort();
+    
+    // Preview.
+    println!("How's this?\n");
+    
+    for ep in &episodes {
+        println!("{}", ep);
+    }
+    println!("");
+    
+    println!("Do you want to rename these?");
+    
+    if input.confirm() {
+        println!("\nWorking...");
+        
+        // Rename all the files.
+        for (i, ep) in episodes.iter().enumerate() {
+            println!("File: {}", i);
+            ep.rename().unwrap_or_else(|_| quit("Failed to rename file."));
+        }
+        
+        println!("All done!");
+    }
+    else {
+        println!("\nOkay, I did nothing.");
+    }
+    
+    // Wait for exit (good for working with midnight commander).
+    input.pause();
+}
+
+fn quit(message: &str) -> ! {
+    println!("{}\nQuitting.", message);
+    std::process::exit(1)
+}
+
+fn input_errors(err: ReadlineError) -> () {
+    match err {
+        ReadlineError::Interrupted => {
+            quit("\nCtrl-C");
+        },
+        ReadlineError::Eof => {
+            quit("\nCtrl-D");
+        },
+        err => {
+            println!("\nError: {:?}", err);
+            quit("uhh");
+        }
+    }
+}
+
+// Get the directory from arg 1.
+// Or, if not provided, the current working directory.
+fn get_directory() -> Result<PathBuf, io::Error> {
+    match env::args().skip(1).next() {
+        Some(path) => PathBuf::from(&path).canonicalize(),
+        None => env::current_dir(),
+    }
+}
+
+// Read the directory as a vector of entries.
+fn read_directory(path: &PathBuf) -> Result<Vec<DirEntry>, io::Error> {
+    fs::read_dir(path).map(|dir| {
+        dir.map(|entry| entry.unwrap())
+        .collect()
+    })
+}
