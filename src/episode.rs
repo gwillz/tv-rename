@@ -33,8 +33,7 @@ impl<'c> EpisodeFactory<'c> {
         
         // Episode numbers must exist.
         let episode_number = match parse_episode_number(&file_name) {
-            // We're trusting that the \d+ regex works properly here.
-            Some(num) => num.parse::<i32>().unwrap(),
+            Some(num) => num,
             None => return Err("Failed to parse episode number."),
         };
         

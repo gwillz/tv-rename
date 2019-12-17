@@ -1,15 +1,21 @@
 
 use std::fs::DirEntry;
 use std::collections::HashMap;
+use std::hash::Hash;
+use std::cmp::Eq;
+
 use super::parsers::{parse_show_name, parse_season_number};
 
-type Parser = fn(&String) -> Option<String>;
+type Parser<R> = fn(&String) -> Option<R>;
 
 pub struct Guesser {
     files: Vec<String>,
 }
 
+/// Show/season guesser.
+/// This parses the season/show from each file and chooses the most frequent.
 impl Guesser {
+    
     pub fn new(files: &Vec<DirEntry>) -> Guesser {
         let file_names = files.iter()
             .map(|entry| String::from(entry.file_name().to_str().unwrap()))
@@ -25,11 +31,11 @@ impl Guesser {
     }
     
     pub fn get_season_number(&self) -> Option<i32> {
-        self.guess(parse_season_number).map(|num| num.parse::<i32>().unwrap())
+        self.guess(parse_season_number)
     }
     
-    fn guess(&self, parser: Parser) -> Option<String> {
-        let mut guesses: HashMap<String, i32> = HashMap::new();
+    fn guess<R: Hash + Eq>(&self, parser: Parser<R>) -> Option<R> {
+        let mut guesses: HashMap<R, i32> = HashMap::new();
     
         for path in &self.files {
             let res = parser(&path);
@@ -45,7 +51,7 @@ impl Guesser {
         }
         
         let mut largest = 0;
-        let mut found: Option<String> = None;
+        let mut found: Option<R> = None;
     
         for (guess, count) in guesses {
             if count > largest {
