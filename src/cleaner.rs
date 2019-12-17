@@ -1,6 +1,7 @@
 
 use std::fs;
 use std::io;
+use std::path::Path;
 use inflector::Inflector;
 
 pub struct Cleaner {
@@ -14,7 +15,12 @@ impl Cleaner {
         }
     }
     
-    pub fn load(&mut self, path: &str) -> Result<(), io::Error> {
+    pub fn create<P: AsRef<Path>>(path: P) -> Result<Cleaner, io::Error> {
+        let mut cleaner = Cleaner::new();
+        cleaner.load(path).map(|_| cleaner)
+    }
+    
+    pub fn load<P: AsRef<Path>>(&mut self, path: P) -> Result<(), io::Error> {
         fs::read_to_string(path)
             .map(|contents| {
                 self.rules = contents.split("\n")
@@ -32,12 +38,6 @@ impl Cleaner {
         
         return working.to_title_case();
     }
-    
-    pub fn create(path: &str) -> Result<Cleaner, io::Error> {
-        let mut cleaner = Cleaner::new();
-        cleaner.load(path).map(|_| cleaner)
-    }
-    
     pub fn size(&self) -> usize {
         self.rules.len()
     }

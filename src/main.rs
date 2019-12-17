@@ -5,26 +5,31 @@ use std::io;
 use std::path::PathBuf;
 
 use rustyline::error::ReadlineError;
+use directories::ProjectDirs;
 
 use input::Input;
 use cleaner::Cleaner;
 use guesser::Guesser;
 use episode::{Episode, EpisodeFactory};
+use exclude_rules::write_exclude;
 
 mod input;
 mod parsers;
 mod cleaner;
 mod guesser;
 mod episode;
+mod exclude_rules;
 
 fn main() {
     println!("TV Rename v1.\n");
     
-    let mut input = Input::new(input_errors);
+    let exclude_path = get_exclude_path()
+        .unwrap_or_else(|e| quit(e));
     
-    // Read exclude rules.
-    let cleaner = Cleaner::create("./exclude.txt")
-        .unwrap_or_else(|_| quit("Failed to load exclude.txt"));
+    let cleaner = Cleaner::create(exclude_path)
+        .unwrap_or_else(|_| quit("Failed to load config file."));
+    
+    let mut input = Input::new(input_errors);
     
     println!("Exclude DB loaded {} rules.", cleaner.size());
     
@@ -52,7 +57,7 @@ fn main() {
     match show_name.as_ref() {
         Some(name) => {
             println!("I think this is {}.", name);
-        },
+        }
         None => {
             println!("I don't know what show this is.");
         }
@@ -133,10 +138,10 @@ fn input_errors(err: ReadlineError) -> () {
     match err {
         ReadlineError::Interrupted => {
             quit("\nCtrl-C");
-        },
+        }
         ReadlineError::Eof => {
             quit("\nCtrl-D");
-        },
+        }
         err => {
             println!("\nError: {:?}", err);
             quit("uhh");
@@ -159,4 +164,27 @@ fn read_directory(path: &PathBuf) -> Result<Vec<DirEntry>, io::Error> {
         dir.map(|entry| entry.unwrap())
         .collect()
     })
+}
+
+fn get_exclude_path() -> Result<PathBuf, &'static str> {
+    match ProjectDirs::from("com", "gwillz", "tv-rename") {
+        // Good, now try writing the exclude file.
+        Some(dirs) => {
+            let path = dirs.config_dir().with_file_name("exclude.txt");
+            
+            match write_exclude(path.as_path()) {
+                // Great, move on.
+                Ok(_) => Ok(path),
+                // Well..
+                Err(err) => match err.kind() {
+                    // This is okay.
+                    io::ErrorKind::AlreadyExists => Ok(path),
+                    // Something bad happened.
+                    _ => Err("Failed to write config file."),
+                }
+            }
+        }
+        // Rare? I assume?
+        None => Err("Failed to find config path.")
+    }
 }

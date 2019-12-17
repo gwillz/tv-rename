@@ -25,10 +25,10 @@ impl Input {
                     match line.as_ref() {
                         "y" | "yes" => {
                             return true;
-                        },
+                        }
                         "n" | "no" => {
                             return false;
-                        },
+                        }
                         _ => {
                             println!("Type 'yes' or 'no'.");
                         }
