@@ -21,7 +21,8 @@ mod episode;
 mod exclude_rules;
 
 fn main() {
-    println!("TV Rename v1.\n");
+    println!("TV Rename v1");
+    println!("------------");
     
     let exclude_path = get_exclude_path()
         .unwrap_or_else(|e| quit(e));
@@ -44,6 +45,12 @@ fn main() {
         .unwrap_or_else(|_| quit("Can't read the directory!"));
     
     println!("Loaded {} files.\n", files.len());
+    
+    for file in &files {
+        println!("{:?}", file.file_name());
+    }
+    
+    println!("");
     
     // Remap into a string vec for guesses.
     let guesser = Guesser::new(&files);

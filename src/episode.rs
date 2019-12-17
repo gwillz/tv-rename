@@ -4,7 +4,6 @@ use std::fs;
 use std::fmt;
 use std::cmp::{self, Ordering};
 use std::path::PathBuf;
-use std::ffi::OsStr;
 
 use super::cleaner::Cleaner;
 use super::parsers::{parse_episode_name, parse_episode_number, parse_extension};
@@ -105,10 +104,9 @@ impl Episode {
 
 impl fmt::Display for Episode {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{} -> {}",
-            self.path.file_name().unwrap_or_else(|| OsStr::new(""))
-                .to_str().unwrap_or(""),
-            self.result()
+        write!(f, "{:?} -> \"{}\"",
+            self.path.file_name().unwrap(),
+            self.result(),
         )
     }
 }
