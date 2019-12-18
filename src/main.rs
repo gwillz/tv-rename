@@ -10,7 +10,7 @@ use directories::ProjectDirs;
 use input::Input;
 use cleaner::Cleaner;
 use guesser::Guesser;
-use episode::{Episode, EpisodeFactory};
+use episode::EpisodeFactory;
 use exclude_rules::write_exclude;
 
 mod input;
@@ -52,14 +52,13 @@ fn main() {
     
     println!("");
     
-    // Remap into a string vec for guesses.
+    // The guesser object finds the most likely show/season.
     let guesser = Guesser::new(&files);
     
     // Guess show name.
     let show_name = guesser.get_show_name()
         .map(|name| cleaner.clean(&name));
     
-    // Confirm the show name.
     println!("{}",
         if show_name.is_some() { "I think this show is:" }
         else { "I don't know what this show is:" }
@@ -70,25 +69,22 @@ fn main() {
     // Guess the season number.
     let season_number = guesser.get_season_number().unwrap_or(1);
     
-    // Confirm the season number.
     println!("I think this season is:");
     let season_number = input.number(season_number);
     println!("");
     
     // Create episode objects.
-    let factory = EpisodeFactory::new(&show_name, season_number, &cleaner);
+    let mut factory = EpisodeFactory::new(&show_name, season_number, &cleaner);
     
-    let mut episodes: Vec<Episode> = files.iter()
-        .map(|file| {
-            factory.create(file.path())
-                .unwrap_or_else(|e| quit(e.as_ref()))
-        })
-        .collect();
-    
-    episodes.sort();
+    for file in files {
+        factory.insert(file.path())
+            .unwrap_or_else(|e| quit(e.as_ref()));
+    }
     
     // Preview.
     println!("\nHow's this?\n");
+    
+    let episodes = factory.get_all();
     
     for ep in &episodes {
         println!("{}", ep);
