@@ -5,13 +5,12 @@ use std::io;
 use std::path::PathBuf;
 
 use rustyline::error::ReadlineError;
-use directories::ProjectDirs;
 
 use input::Input;
 use cleaner::Cleaner;
 use guesser::Guesser;
 use episode::EpisodeFactory;
-use exclude_rules::write_exclude;
+use exclude_rules::get_rules_path;
 
 mod input;
 mod parsers;
@@ -24,10 +23,10 @@ fn main() {
     println!("TV Rename v1");
     println!("------------");
     
-    let exclude_path = get_exclude_path()
+    let rules_path = get_rules_path()
         .unwrap_or_else(|e| quit(e));
     
-    let cleaner = Cleaner::load(exclude_path)
+    let cleaner = Cleaner::load(rules_path)
         .unwrap_or_else(|_| quit("Failed to load config file."));
     
     let mut input = Input::new(input_errors);
@@ -148,28 +147,4 @@ fn read_directory(path: &PathBuf) -> Result<Vec<DirEntry>, io::Error> {
         dir.map(|entry| entry.unwrap())
         .collect()
     })
-}
-
-/// Get the config path.
-fn get_exclude_path() -> Result<PathBuf, &'static str> {
-    match ProjectDirs::from("com", "gwillz", "tv-rename") {
-        // Good, now try writing the exclude file.
-        Some(dirs) => {
-            let path = dirs.config_dir().with_file_name("exclude.txt");
-            
-            match write_exclude(path.as_path()) {
-                // Great, move on.
-                Ok(_) => Ok(path),
-                // Well..
-                Err(err) => match err.kind() {
-                    // This is okay.
-                    io::ErrorKind::AlreadyExists => Ok(path),
-                    // Something bad happened.
-                    _ => Err("Failed to write config file."),
-                }
-            }
-        }
-        // Rare? I assume?
-        None => Err("Failed to find config path.")
-    }
 }
