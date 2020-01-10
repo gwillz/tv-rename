@@ -64,15 +64,15 @@ impl Input {
         }
     }
     
-    /// Query for a number. Must be an integer.
-    pub fn number(&mut self, num: i32) -> i32 {
+    /// Query for a number. Must be a positive integer.
+    pub fn number(&mut self, num: u32) -> u32 {
         let prefill = num.to_string();
         
         loop {
             match self.rl.readline_with_initial(">> ", (prefill.as_ref(), "")) {
                 Ok(line) => {
                     // Must be a number.
-                    match line.parse::<i32>() {
+                    match line.parse::<u32>() {
                         Ok(num) => return num,
                         Err(_) => {
                             println!("Not a number, try again.");

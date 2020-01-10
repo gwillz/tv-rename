@@ -12,8 +12,8 @@ use super::cleaner::Cleaner;
 use super::parsers::{parse_episode_name, parse_episode_number, parse_extension};
 
 /// Factory for creating episode objects.
-pub struct EpisodeFactory<'c,> {
-    season: i32,
+pub struct EpisodeFactory<'c> {
+    season: u32,
     show_name: String,
     cleaner: &'c Cleaner,
     episodes: HashSet<Episode>,
@@ -21,7 +21,7 @@ pub struct EpisodeFactory<'c,> {
 
 impl<'c> EpisodeFactory<'c> {
     
-    pub fn new(show_name: &String, season: i32, cleaner: &'c Cleaner) -> EpisodeFactory<'c> {
+    pub fn new(show_name: &String, season: u32, cleaner: &'c Cleaner) -> EpisodeFactory<'c> {
         EpisodeFactory {
             show_name: show_name.clone(),
             season: season,
@@ -95,8 +95,8 @@ impl<'c> EpisodeFactory<'c> {
 #[derive(Clone)]
 pub struct Episode {
     pub(in crate) path: PathBuf,
-    pub(in crate) episode: i32,
-    pub(in crate) season: i32,
+    pub(in crate) episode: u32,
+    pub(in crate) season: u32,
     pub(in crate) name: String,
     pub(in crate) show_name: String,
     pub(in crate) extension: String,
@@ -120,10 +120,10 @@ impl Episode {
         }
         else {
             format!("{} {}{}.{}",
-            self.show_name,
-            self.identifier(),
-            self.name,
-            self.extension,
+                self.show_name,
+                self.identifier(),
+                self.name,
+                self.extension,
             )
         }
     }

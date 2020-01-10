@@ -55,7 +55,7 @@ pub fn parse_show_name(path: &String) -> Option<String> {
 }
 
 /// Get the season number.
-pub fn parse_season_number(path: &String) -> Option<i32> {
+pub fn parse_season_number(path: &String) -> Option<u32> {
     
     let mut caps: Option<String> = None;
     
@@ -82,7 +82,7 @@ pub fn parse_season_number(path: &String) -> Option<i32> {
     
     // Parse number, errors are None.
     if let Some(num) = caps {
-        return num.parse::<i32>().ok();
+        return num.parse::<u32>().ok();
     }
     
     None
@@ -97,7 +97,7 @@ pub fn parse_episode_name(path: &String) -> Option<String> {
 }
 
 /// Get the episode number.
-pub fn parse_episode_number(path: &String) -> Option<i32> {
+pub fn parse_episode_number(path: &String) -> Option<u32> {
     
     let mut caps: Option<String> = None;
     
@@ -131,7 +131,7 @@ pub fn parse_episode_number(path: &String) -> Option<i32> {
     
     // Parse number, errors are None.
     if let Some(num) = caps {
-        return num.parse::<i32>().ok();
+        return num.parse::<u32>().ok();
     }
     
     None

@@ -33,13 +33,13 @@ impl Guesser {
     }
     
     /// Get the most likely season number.
-    pub fn get_season_number(&self) -> Option<i32> {
+    pub fn get_season_number(&self) -> Option<u32> {
         self.guess(parse_season_number)
     }
     
     /// Internal guesser loop.
     fn guess<R: Hash + Eq>(&self, parser: Parser<R>) -> Option<R> {
-        let mut guesses: HashMap<R, i32> = HashMap::new();
+        let mut guesses: HashMap<R, u32> = HashMap::new();
     
         // Gather up all the possible values.
         for path in &self.files {
