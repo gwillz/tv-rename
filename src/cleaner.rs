@@ -49,3 +49,28 @@ impl Cleaner {
         self.rules.len()
     }
 }
+
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    
+    #[test]
+    fn test() {
+        let cleaner = Cleaner {
+            rules: vec![
+                String::from("fov"),
+                String::from("mtb"),
+                String::from("h264"),
+                String::from("lol"),
+                String::from("hdtv"),
+                String::from("ac3"),
+            ]
+        };
+        
+        let actual = cleaner.clean("yep.okay.SURe[H264][AC3]-LOL");
+        let expected = "Yep Okay Sure";
+        
+        assert_eq!(expected, actual);
+    }
+}
