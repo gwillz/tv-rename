@@ -119,7 +119,7 @@ impl Episode {
             )
         }
         else {
-            format!("{} {}{}.{}",
+            format!("{} {} - {}.{}",
                 self.show_name,
                 self.identifier(),
                 self.name,
@@ -185,5 +185,47 @@ impl cmp::Ord for Episode {
         else {
             Ordering::Less
         }
+    }
+}
+
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    
+    fn create_episode(episode: u32, season: u32) -> Episode {
+        Episode {
+            path: PathBuf::from("one/two/three.mp4"),
+            episode: episode,
+            season: season,
+            name: String::from("The One With The Baby Shower"),
+            show_name: String::from("Friends"),
+            extension: String::from("mp4"),
+        }
+    }
+    
+    #[test]
+    fn test_episode_filename() {
+        let episode = create_episode(20, 8);
+        
+        let actual = episode.file_name();
+        let expected = "Friends S08E20 - The One With The Baby Shower.mp4";
+        
+        assert_eq!(expected, actual);
+    }
+    
+    #[test]
+    fn test_episode_compare() {
+        let mut episodes = vec![
+            create_episode(20, 8),
+            create_episode(10, 8),
+            create_episode(30, 4),
+        ];
+        
+        episodes.sort();
+        
+        assert_eq!(episodes[0].identifier(), "S04E30");
+        assert_eq!(episodes[1].identifier(), "S08E10");
+        assert_eq!(episodes[2].identifier(), "S08E20");
     }
 }
