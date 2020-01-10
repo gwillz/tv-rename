@@ -27,7 +27,7 @@ fn main() {
     let exclude_path = get_exclude_path()
         .unwrap_or_else(|e| quit(e));
     
-    let cleaner = Cleaner::create(exclude_path)
+    let cleaner = Cleaner::load(exclude_path)
         .unwrap_or_else(|_| quit("Failed to load config file."));
     
     let mut input = Input::new(input_errors);

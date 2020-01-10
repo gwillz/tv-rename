@@ -7,7 +7,7 @@ use inflector::Inflector;
 // @todo Could these rules be regex?
 fn parse_rules<S: AsRef<str>>(contents: S) -> Vec<String> {
     contents.as_ref().to_lowercase().split("\n")
-        .map(|s| String::from(s).trim())
+        .map(|s| String::from(s.trim()))
         .collect()
 }
 
@@ -21,7 +21,7 @@ pub struct Cleaner {
 
 impl Cleaner {
     /// Load a set of rules.
-    pub fn create<P: AsRef<Path>>(path: P) -> Result<Cleaner, io::Error> {
+    pub fn load<P: AsRef<Path>>(path: P) -> Result<Cleaner, io::Error> {
         fs::read_to_string(path).map(|contents| {
             Cleaner {
                 rules: parse_rules(contents)
@@ -52,7 +52,7 @@ mod test {
     use super::*;
     
     #[test]
-    fn test() {
+    fn test_clean() {
         let cleaner = Cleaner {
             rules: vec![
                 String::from("fov"),
@@ -69,4 +69,8 @@ mod test {
         
         assert_eq!(expected, actual);
     }
+    
+    // @todo
+    // #[test]
+    // fn test_load() {
 }
