@@ -4,44 +4,40 @@ use std::io;
 use std::path::Path;
 use inflector::Inflector;
 
+// @todo Could these rules be regex?
+fn parse_rules<S: AsRef<str>>(contents: S) -> Vec<String> {
+    contents.as_ref().to_lowercase().split("\n")
+        .map(|s| String::from(s).trim())
+        .collect()
+}
+
 /// Clean strings.
 /// - Removes strings provided by an 'exclude' file.
 /// - Replaces separators with white space.
 /// - Formats in 'Title Case'.
 pub struct Cleaner {
-    rules: Vec<String>,
+    pub(in crate) rules: Vec<String>,
 }
 
 impl Cleaner {
-    
-    fn new() -> Cleaner {
-        Cleaner {
-            rules: Vec::new(),
-        }
-    }
-    
-    fn load<P: AsRef<Path>>(&mut self, path: P) -> Result<(), io::Error> {
-        fs::read_to_string(path)
-            .map(|contents| {
-                self.rules = contents.split("\n")
-                    .map(|s| String::from(s))
-                    .collect();
-            })
-    }
-    
+    /// Load a set of rules.
     pub fn create<P: AsRef<Path>>(path: P) -> Result<Cleaner, io::Error> {
-        let mut cleaner = Cleaner::new();
-        cleaner.load(path).map(|_| cleaner)
+        fs::read_to_string(path).map(|contents| {
+            Cleaner {
+                rules: parse_rules(contents)
+            }
+        })
     }
     
     /// Clean this text.
-    pub fn clean(&self, text: &String) -> String {
-        let mut working = text.to_lowercase();
+    pub fn clean<T: AsRef<str>>(&self, text: T) -> String {
+        let mut working = text.as_ref().to_lowercase();
         
         for rule in &self.rules {
             working = working.replace(rule.as_str(), "");
         }
         
+        // @todo How could we do non-caps for 'with' 'to' 'the'?
         return working.to_title_case();
     }
     
