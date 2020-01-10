@@ -11,7 +11,7 @@ type Parser<R> = fn(&String) -> Option<R>;
 /// Show/season guesser.
 /// This parses the season/show from each file and chooses the most frequent.
 pub struct Guesser {
-    files: Vec<String>,
+    pub(in crate) files: Vec<String>,
 }
 
 impl Guesser {
@@ -67,5 +67,51 @@ impl Guesser {
         }
         
         return found;
+    }
+}
+
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    
+    #[test]
+    fn test_good() {
+        let guesser = Guesser {
+            files: vec![
+                String::from("three.s03e01.mp4"),
+                String::from("three.s03e02.mp4"),
+                String::from("three.s04e03.mp4"),
+                String::from("three.s04e04.mp4"),
+                String::from("four.s04e05.mp4"),
+            ]
+        };
+        
+        assert_eq!(guesser.get_season_number(), Some(4));
+        assert_eq!(guesser.get_show_name(), Some(String::from("three.")));
+    }
+    
+    #[test]
+    fn test_bad_season() {
+        let guesser = Guesser {
+            files: vec![
+                String::from("three.episode.1.mp4"),
+            ]
+        };
+        
+        assert_eq!(guesser.get_season_number(), None);
+        assert_eq!(guesser.get_show_name(), Some(String::from("three.")));
+    }
+    
+    #[test]
+    fn test_bad_show_name() {
+        let guesser = Guesser {
+            files: vec![
+                String::from("s01e01-whatever.mp4"),
+            ]
+        };
+        
+        assert_eq!(guesser.get_season_number(), Some(1));
+        assert_eq!(guesser.get_show_name(), None);
     }
 }
