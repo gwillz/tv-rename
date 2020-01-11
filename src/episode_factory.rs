@@ -88,3 +88,38 @@ impl<'c> EpisodeFactory<'c> {
     }
 }
 
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use crate::cleaner::Cleaner;
+    
+    #[test]
+    fn test_create() {
+        let cleaner = Cleaner::new(vec!["lol", "ftw"]);
+        let factory = EpisodeFactory::new("Friends", 1, &cleaner);
+        
+        let episode = factory.create(PathBuf::from("friends.1x01.the.one.[ftw]-LOL.mp4"));
+        
+        let actual = episode.unwrap().file_name();
+        let expected = "Friends S01E01 - The One.mp4";
+        
+        assert_eq!(expected, actual);
+    }
+    
+    #[test]
+    fn test_insert() {
+        let cleaner = Cleaner::new(vec!["lol", "ftw"]);
+        let mut factory = EpisodeFactory::new("friends", 1, &cleaner);
+        
+        factory.insert(PathBuf::from("friends.1x03.mp4")).unwrap();
+        factory.insert(PathBuf::from("friends.1x01.mp4")).unwrap();
+        factory.insert(PathBuf::from("friends.1x02.mp4")).unwrap();
+        
+        let sorted = factory.get_all();
+        
+        assert_eq!(sorted[0].identifier(), "S01E01");
+        assert_eq!(sorted[1].identifier(), "S01E02");
+        assert_eq!(sorted[2].identifier(), "S01E03");
+    }
+}
