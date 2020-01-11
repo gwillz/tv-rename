@@ -44,7 +44,8 @@ fn main() {
     let files = read_directory(&path)
         .unwrap_or_else(|_| quit("Can't read the directory!"));
     
-    println!("Loaded {} files.\n", files.len());
+    println!("Loaded {} files.", files.len());
+    println!("");
     
     for file in &files {
         println!("{:?}", file.file_name());
@@ -82,7 +83,8 @@ fn main() {
     }
     
     // Preview.
-    println!("\nHow's this?\n");
+    println!("How's this?");
+    println!("");
     
     let episodes = factory.get_all();
     
@@ -90,10 +92,12 @@ fn main() {
         println!("{}", ep);
     }
     
-    println!("\nDo you want to rename these?");
+    println!("");
+    println!("Do you want to rename these?");
     
     if input.confirm() {
-        println!("\nWorking...");
+        println!("");
+        println!("Working...");
         
         // Rename all the files.
         for (i, ep) in episodes.iter().enumerate() {
@@ -104,7 +108,8 @@ fn main() {
         println!("All done!");
     }
     else {
-        println!("\nOkay, I did nothing.");
+        println!("");
+        println!("Okay, I did nothing.");
     }
     
     // Wait for exit (good for working with midnight commander).

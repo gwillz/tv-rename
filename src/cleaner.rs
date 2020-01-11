@@ -21,6 +21,7 @@ pub struct Cleaner {
 
 impl Cleaner {
     /// For testing.
+    #[allow(dead_code)]
     pub fn new<S: ToString>(rules: Vec<S>) -> Cleaner {
         Cleaner {
             rules: rules.iter().map(|rule| rule.to_string()).collect()
