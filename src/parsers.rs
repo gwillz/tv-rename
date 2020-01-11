@@ -50,12 +50,12 @@ lazy_static! {
 }
 
 /// Get the show name.
-pub fn parse_show_name(path: &String) -> Option<String> {
+pub fn parse_show_name(path: &str) -> Option<String> {
     SHOW_NAME.captures(path).map(|m| String::from(&m[1]))
 }
 
 /// Get the season number.
-pub fn parse_season_number(path: &String) -> Option<u32> {
+pub fn parse_season_number(path: &str)-> Option<u32> {
     
     let mut caps: Option<String> = None;
     
@@ -89,7 +89,7 @@ pub fn parse_season_number(path: &String) -> Option<u32> {
 }
 
 /// Get the episode name.
-pub fn parse_episode_name(path: &String) -> Option<String> {
+pub fn parse_episode_name(path: &str) -> Option<String> {
     EPISODE_NAME
         .captures(path)
         .map(|m| String::from(&m[1]))
@@ -97,7 +97,7 @@ pub fn parse_episode_name(path: &String) -> Option<String> {
 }
 
 /// Get the episode number.
-pub fn parse_episode_number(path: &String) -> Option<u32> {
+pub fn parse_episode_number(path: &str) -> Option<u32> {
     
     let mut caps: Option<String> = None;
     
@@ -138,7 +138,7 @@ pub fn parse_episode_number(path: &String) -> Option<u32> {
 }
 
 /// Get the extension.
-pub fn parse_extension(path: &String) -> Option<String> {
+pub fn parse_extension(path: &str) -> Option<String> {
     EXTENSION
         .captures(path)
         .map(|m| String::from(&m[1]))

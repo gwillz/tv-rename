@@ -6,7 +6,7 @@ use std::cmp::Eq;
 
 use super::parsers::{parse_show_name, parse_season_number};
 
-type Parser<R> = fn(&String) -> Option<R>;
+type Parser<R> = fn(&str) -> Option<R>;
 
 /// Show/season guesser.
 /// This parses the season/show from each file and chooses the most frequent.
@@ -43,7 +43,7 @@ impl Guesser {
     
         // Gather up all the possible values.
         for path in &self.files {
-            let res = parser(&path);
+            let res = parser(path.as_ref());
             
             if res.is_some() {
                 let key = res.unwrap();
