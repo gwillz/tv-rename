@@ -20,6 +20,13 @@ pub struct Cleaner {
 }
 
 impl Cleaner {
+    /// For testing.
+    pub fn new<S: ToString>(rules: Vec<S>) -> Cleaner {
+        Cleaner {
+            rules: rules.iter().map(|rule| rule.to_string()).collect()
+        }
+    }
+    
     /// Load a set of rules.
     pub fn load<P: AsRef<Path>>(path: P) -> Result<Cleaner, io::Error> {
         fs::read_to_string(path).map(|contents| {
@@ -53,16 +60,9 @@ mod test {
     
     #[test]
     fn test_clean() {
-        let cleaner = Cleaner {
-            rules: vec![
-                String::from("fov"),
-                String::from("mtb"),
-                String::from("h264"),
-                String::from("lol"),
-                String::from("hdtv"),
-                String::from("ac3"),
-            ]
-        };
+        let cleaner = Cleaner::new(vec!["lol", "ac3", "h264", "hdtv"]);
+        
+        assert_eq!(4, cleaner.size());
         
         let actual = cleaner.clean("yep.okay.SURe[H264][AC3]-LOL");
         let expected = "Yep Okay Sure";
@@ -70,7 +70,10 @@ mod test {
         assert_eq!(expected, actual);
     }
     
-    // @todo
-    // #[test]
-    // fn test_load() {
+    #[test]
+    fn test_load() {
+        let cleaner = Cleaner::load(Path::new("test/exclude.txt")).unwrap();
+        
+        assert_eq!(27, cleaner.size());
+    }
 }
