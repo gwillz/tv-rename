@@ -9,7 +9,7 @@ use rustyline::error::ReadlineError;
 use input::Input;
 use cleaner::Cleaner;
 use guesser::Guesser;
-use episode::EpisodeFactory;
+use episode_factory::EpisodeFactory;
 use exclude_rules::get_rules_path;
 
 mod input;
@@ -17,6 +17,7 @@ mod parsers;
 mod cleaner;
 mod guesser;
 mod episode;
+mod episode_factory;
 mod exclude_rules;
 
 fn main() {
